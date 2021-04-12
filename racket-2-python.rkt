@@ -85,9 +85,11 @@
               (equal? (third stx) '=>))
          (list (second stx)
                '=
+               "("
                'lambda
                'x:
-               (pre-2-in/stx (fourth stx)))]
+               (pre-2-in/stx (fourth stx))
+               ")")]
         [(and (list? stx)
               (= 3 (length stx))
               (equal? (first stx) '+))
@@ -117,7 +119,9 @@
               (equal? (first stx) 'println))
          (list 'print
                "("
+               "'"
                (pre-2-in/stx (second stx))
+               "'"
                ")")]
         [(and (= 2 (length stx))
               (is-lam?/stx (first stx))
@@ -128,7 +132,7 @@
                      stx)]))
 
 (check-equal? (pre-2-in "(/ car => (+ 1 2))")  
-              "(car = lambda x: (1 + 2))")
+              "(car = ( lambda x: (1 + 2) ))")
 (check-equal? (pre-2-in l-str)
               "((4 + 5) + ((5 + 6) + 8))")
 (check-equal? (pre-2-in "(* 4 2)")  
@@ -136,12 +140,12 @@
 (check-equal? (pre-2-in "(ifleq0 -2 1 2)")  
               "(1 if ( -2 <= 0 ) else 2)")
 (check-equal? (pre-2-in "(println 2)")  
-              "(print ( 2 ))")
+              "(print ( ' 2 ' ))")
 (check-equal? (pre-2-in "(println (+ 1 2))")  
-              "(print ( (1 + 2) ))")
+              "(print ( ' (1 + 2) ' ))")
 
 
-
+;This function was written before I realized that ~a changes the list that I return into a string.
 ;this function takes in a list of lambda calcs and returns a string represetnation
 (define (to-string lolc)
   (cond
@@ -157,13 +161,15 @@
 
 
  ;This funtion takes in the input string and outputs the python code for the lambda expression
+;it currently works for all the definitions except the assignment of the id. This problem however
+;compounds to the (LC LC) grammar and messes the parens up for that one though.
 (define (translate str)
   (if (is-lam? str) (pre-2-in str) (error 'ta "bad input ~v" str)))
 
 (translate l-str)
 (translate "1")
 (translate "(/ vroom => 3)")
-(translate "((/ bus => (+ x 42)) (* 3 4))")
+(translate "(println ((/ bus => (+ x 42)) (* 3 4)))")
 
 
  
